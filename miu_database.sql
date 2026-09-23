@@ -3,12 +3,89 @@ USE miu;
 SET FOREIGN_KEY_CHECKS=0;
 DROP TABLE IF EXISTS registration,payment,enrollment,student,course_unit,course,lecturer,fee_type,department;
 SET FOREIGN_KEY_CHECKS=1;
-CREATE TABLE department(dept_id INT AUTO_INCREMENT PRIMARY KEY,dept_code VARCHAR(10) NOT NULL,dept_name VARCHAR(100) NOT NULL,office_location VARCHAR(50) NOT NULL,head_of_dept VARCHAR(100) NOT NULL,phone VARCHAR(15) NOT NULL,email VARCHAR(100) NOT NULL);
-CREATE TABLE lecturer(lecturer_id INT AUTO_INCREMENT PRIMARY KEY,staff_no VARCHAR(20) NOT NULL,fName VARCHAR(20) NOT NULL,lName VARCHAR(20) NOT NULL,email VARCHAR(100) NOT NULL,phone VARCHAR(15) NOT NULL,dept_id INT NOT NULL,FOREIGN KEY(dept_id) REFERENCES department(dept_id));
-CREATE TABLE course(course_id INT AUTO_INCREMENT PRIMARY KEY,course_code VARCHAR(5) NOT NULL,course_title VARCHAR(50) NOT NULL,credits INT NOT NULL,dept_id INT NOT NULL,lecturer_id INT NOT NULL,FOREIGN KEY(dept_id) REFERENCES department(dept_id),FOREIGN KEY(lecturer_id) REFERENCES lecturer(lecturer_id));
-CREATE TABLE course_unit(course_unit_id INT AUTO_INCREMENT PRIMARY KEY,course_unit_code VARCHAR(10) NOT NULL,course_unit_title VARCHAR(100) NOT NULL,credit_units INT NOT NULL,course_id INT NOT NULL,FOREIGN KEY(course_id) REFERENCES course(course_id));
-CREATE TABLE student(student_id INT AUTO_INCREMENT PRIMARY KEY,reg_no VARCHAR(20) NOT NULL,first_name VARCHAR(20) NOT NULL,last_name VARCHAR(20) NOT NULL,gender ENUM('Male','Female') NOT NULL,date_of_birth DATE NOT NULL,email VARCHAR(100) NOT NULL,address VARCHAR(50) NOT NULL,course_id INT NOT NULL,FOREIGN KEY(course_id) REFERENCES course(course_id));
-CREATE TABLE fee_type(fee_type_id INT AUTO_INCREMENT PRIMARY KEY,fee_name VARCHAR(20),amount INT);
-CREATE TABLE enrollment(enrollment_id INT AUTO_INCREMENT PRIMARY KEY,enrollment_date DATE NOT NULL,status ENUM('Enrolled','Active','Completed','Dropped','Deferred','Cancelled') NOT NULL,student_id INT NOT NULL,course_id INT NOT NULL,FOREIGN KEY(student_id) REFERENCES student(student_id),FOREIGN KEY(course_id) REFERENCES course(course_id));
-CREATE TABLE payment(payment_id INT AUTO_INCREMENT PRIMARY KEY,amount INT,payment VARCHAR(10),payment_date DATE,method VARCHAR(20),reference_no VARCHAR(50),student_id INT NOT NULL,fee_type_id INT NOT NULL,FOREIGN KEY(student_id) REFERENCES student(student_id),FOREIGN KEY(fee_type_id) REFERENCES fee_type(fee_type_id));
-CREATE TABLE registration(registration_id INT AUTO_INCREMENT PRIMARY KEY,student_id INT NOT NULL,course_id INT NOT NULL,fee_type_id INT NOT NULL,registration_date DATE,amount_paid INT,FOREIGN KEY(student_id) REFERENCES student(student_id),FOREIGN KEY(course_id) REFERENCES course(course_id),FOREIGN KEY(fee_type_id) REFERENCES fee_type(fee_type_id));
+CREATE TABLE department(
+    dept_id INT AUTO_INCREMENT PRIMARY KEY,
+    dept_code VARCHAR(10) NOT NULL,
+    dept_name VARCHAR(100) NOT NULL,
+    office_location VARCHAR(50) NOT NULL,
+    head_of_dept VARCHAR(100) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    email VARCHAR(100) NOT NULL
+);
+CREATE TABLE lecturer(
+    lecturer_id INT AUTO_INCREMENT PRIMARY KEY,
+    staff_no VARCHAR(20) NOT NULL,
+    fName VARCHAR(20) NOT NULL,
+    lName VARCHAR(20) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    dept_id INT NOT NULL,
+    FOREIGN KEY(dept_id) REFERENCES department(dept_id)
+);
+CREATE TABLE course(
+    course_id INT AUTO_INCREMENT PRIMARY KEY,
+    course_code VARCHAR(5) NOT NULL,
+    course_title VARCHAR(50) NOT NULL,
+    credits INT NOT NULL,
+    dept_id INT NOT NULL,
+    lecturer_id INT NOT NULL,
+    FOREIGN KEY(dept_id) REFERENCES department(dept_id),
+    FOREIGN KEY(lecturer_id) REFERENCES lecturer(lecturer_id)
+);
+CREATE TABLE course_unit(
+    course_unit_id INT AUTO_INCREMENT PRIMARY KEY,
+    course_unit_code VARCHAR(10) NOT NULL,
+    course_unit_title VARCHAR(100) NOT NULL,
+    credit_units INT NOT NULL,
+    course_id INT NOT NULL,
+    FOREIGN KEY(course_id) REFERENCES course(course_id)
+);
+CREATE TABLE student(
+    student_id INT AUTO_INCREMENT PRIMARY KEY,
+    reg_no VARCHAR(20) NOT NULL,
+    first_name VARCHAR(20) NOT NULL,
+    last_name VARCHAR(20) NOT NULL,
+    gender ENUM('Male','Female') NOT NULL,
+    date_of_birth DATE NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    address VARCHAR(50) NOT NULL,
+    course_id INT NOT NULL,
+    FOREIGN KEY(course_id) REFERENCES course(course_id)
+);
+CREATE TABLE fee_type(
+    fee_type_id INT AUTO_INCREMENT PRIMARY KEY,
+    fee_name VARCHAR(20),
+    amount INT
+);
+CREATE TABLE enrollment(
+    enrollment_id INT AUTO_INCREMENT PRIMARY KEY,
+    enrollment_date DATE NOT NULL,
+    status ENUM('Enrolled','Active','Completed','Dropped','Deferred','Cancelled') NOT NULL,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
+    FOREIGN KEY(student_id) REFERENCES student(student_id),
+    FOREIGN KEY(course_id) REFERENCES course(course_id)
+);
+CREATE TABLE payment(
+    payment_id INT AUTO_INCREMENT PRIMARY KEY,
+    amount INT,
+    payment VARCHAR(10),
+    payment_date DATE,
+    method VARCHAR(20),
+    reference_no VARCHAR(50),
+    student_id INT NOT NULL,
+    fee_type_id INT NOT NULL,
+    FOREIGN KEY(student_id) REFERENCES student(student_id),
+    FOREIGN KEY(fee_type_id) REFERENCES fee_type(fee_type_id)
+);
+CREATE TABLE registration(
+    registration_id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    course_id INT NOT NULL,
+    fee_type_id INT NOT NULL,
+    registration_date DATE,
+    amount_paid INT,
+    FOREIGN KEY(student_id) REFERENCES student(student_id),
+    FOREIGN KEY(course_id) REFERENCES course(course_id),
+    FOREIGN KEY(fee_type_id) REFERENCES fee_type(fee_type_id)
+);

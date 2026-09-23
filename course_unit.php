@@ -1,8 +1,127 @@
 <?php
-require "db.php";$pageTitle="Course Unit";$id=0;$code="";$title="";$credits="";$course="";
-if(isset($_POST['save'])){$id=(int)$_POST['course_unit_id'];$code=mysqli_real_escape_string($conn,$_POST['course_unit_code']);$title=mysqli_real_escape_string($conn,$_POST['course_unit_title']);$credits=(int)$_POST['credit_units'];$course=(int)$_POST['course_id'];$sql=$id?"UPDATE course_unit SET course_unit_code='$code',course_unit_title='$title',credit_units=$credits,course_id=$course WHERE course_unit_id=$id":"INSERT INTO course_unit(course_unit_code,course_unit_title,credit_units,course_id) VALUES('$code','$title',$credits,$course)";if(mysqli_query($conn,$sql)){header("Location: course_unit.php?message=Course Unit saved successfully");exit;}$error=mysqli_error($conn);}
-if(isset($_POST['delete'])){$id=(int)$_POST['delete_id'];if(mysqli_query($conn,"DELETE FROM course_unit WHERE course_unit_id=$id")){header("Location: course_unit.php?message=Course Unit deleted successfully");exit;}$error=mysqli_error($conn);}
-if(isset($_GET['edit'])){$id=(int)$_GET['edit'];$r=mysqli_fetch_assoc(mysqli_query($conn,"SELECT * FROM course_unit WHERE course_unit_id=$id"));if($r){$code=$r['course_unit_code'];$title=$r['course_unit_title'];$credits=$r['credit_units'];$course=$r['course_id'];}}
-require "header.php";if(isset($error))echo '<div class="message error">'.htmlspecialchars($error).'</div>';?>
-<h1>Course Unit Form</h1><div class="card"><form action="course_unit.php" method="POST"><input type="hidden" name="course_unit_id" value="<?php echo $id;?>"><div class="form-grid"><div class="field"><label>Course Unit Code</label><input name="course_unit_code" value="<?php echo htmlspecialchars($code);?>" required></div><div class="field"><label>Course Unit Title</label><input name="course_unit_title" value="<?php echo htmlspecialchars($title);?>" required></div><div class="field"><label>Credit Units</label><input type="number" name="credit_units" value="<?php echo $credits;?>" required></div><div class="field"><label>Course</label><select name="course_id" required><option value="">Select Course</option><?php $q=mysqli_query($conn,"SELECT * FROM course ORDER BY course_code");while($r=mysqli_fetch_assoc($q))echo '<option value="'.$r['course_id'].'" '.($course==$r['course_id']?'selected':'').'>'.htmlspecialchars($r['course_code'].' - '.$r['course_title']).'</option>';?></select></div></div><div class="actions"><button class="btn" name="save"><?php echo $id?'Update Course Unit':'Save Course Unit';?></button><a class="btn secondary" href="course_unit.php">Clear</a></div></form></div>
-<div class="card"><h2>Course Unit Records</h2><div class="table-wrap"><table><tr><th>course_unit_id</th><th>Code</th><th>Title</th><th>Credits</th><th>Course</th><th>Actions</th></tr><?php $q=mysqli_query($conn,"SELECT u.*,c.course_code FROM course_unit u JOIN course c ON c.course_id=u.course_id ORDER BY u.course_unit_id DESC");while($r=mysqli_fetch_assoc($q)){echo '<tr><td>'.$r['course_unit_id'].'</td><td>'.htmlspecialchars($r['course_unit_code']).'</td><td>'.htmlspecialchars($r['course_unit_title']).'</td><td>'.$r['credit_units'].'</td><td>'.htmlspecialchars($r['course_code']).'</td><td><a class="btn" href="course_unit.php?edit='.$r['course_unit_id'].'">Edit</a> <form action="course_unit.php" method="POST" style="display:inline"><input type="hidden" name="delete_id" value="'.$r['course_unit_id'].'"><button class="btn danger" name="delete" onclick="return confirm(\'Delete?\')">Delete</button></form></td></tr>';}?></table></div></div><?php require "footer.php";?>
+require "db.php";
+$pageTitle = "Course Unit";
+$id = 0;
+$code = "";
+$title = "";
+$credits = "";
+$course = "";
+if (isset($_POST["save"])) {
+    $id = (int) $_POST["course_unit_id"];
+    $code = mysqli_real_escape_string($conn, $_POST["course_unit_code"]);
+    $title = mysqli_real_escape_string($conn, $_POST["course_unit_title"]);
+    $credits = (int) $_POST["credit_units"];
+    $course = (int) $_POST["course_id"];
+    $sql = $id
+        ? "UPDATE course_unit SET course_unit_code='$code',course_unit_title='$title',credit_units=$credits,course_id=$course WHERE course_unit_id=$id"
+        : "INSERT INTO course_unit(course_unit_code,course_unit_title,credit_units,course_id) VALUES('$code','$title',$credits,$course)";
+    if (mysqli_query($conn, $sql)) {
+        header("Location: course_unit.php?message=Course Unit saved successfully");
+        exit();
+    }
+    $error = mysqli_error($conn);
+}
+if (isset($_POST["delete"])) {
+    $id = (int) $_POST["delete_id"];
+    if (mysqli_query($conn, "DELETE FROM course_unit WHERE course_unit_id=$id")) {
+        header("Location: course_unit.php?message=Course Unit deleted successfully");
+        exit();
+    }
+    $error = mysqli_error($conn);
+}
+if (isset($_GET["edit"])) {
+    $id = (int) $_GET["edit"];
+    $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM course_unit WHERE course_unit_id=$id"));
+    if ($r) {
+        $code = $r["course_unit_code"];
+        $title = $r["course_unit_title"];
+        $credits = $r["credit_units"];
+        $course = $r["course_id"];
+    }
+}
+require "header.php";
+if (isset($error)) {
+    echo '<div class="message error">' . htmlspecialchars($error) . "</div>";
+}
+?>
+<h1>Course Unit Form</h1>
+<div class="card">
+  <form action="course_unit.php" method="POST">
+    <input type="hidden" name="course_unit_id" value="<?php echo $id; ?>">
+    <div class="form-grid">
+      <div class="field">
+        <label>Course Unit Code</label>
+        <input name="course_unit_code" value="<?php echo htmlspecialchars($code); ?>" required>
+      </div>
+      <div class="field">
+        <label>Course Unit Title</label>
+        <input name="course_unit_title" value="<?php echo htmlspecialchars($title); ?>" required>
+      </div>
+      <div class="field">
+        <label>Credit Units</label>
+        <input type="number" name="credit_units" value="<?php echo $credits; ?>" required>
+      </div>
+      <div class="field">
+        <label>Course</label>
+        <select name="course_id" required>
+          <option value="">Select Course</option>
+          <?php
+          $q = mysqli_query($conn, "SELECT * FROM course ORDER BY course_code");
+          while ($r = mysqli_fetch_assoc($q)) {
+              echo '<option value="' .
+                  $r["course_id"] .
+                  '" ' .
+                  ($course == $r["course_id"] ? "selected" : "") .
+                  ">" .
+                  htmlspecialchars($r["course_code"] . " - " . $r["course_title"]) .
+                  "</option>";
+          }
+          ?>
+        </select>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" name="save"><?php echo $id ? "Update Course Unit" : "Save Course Unit"; ?></button>
+      <a class="btn secondary" href="course_unit.php">Clear</a>
+    </div>
+  </form>
+</div>
+<div class="card">
+  <h2>Course Unit Records</h2>
+  <div class="table-wrap">
+    <table>
+      <tr>
+        <th>course_unit_id</th>
+        <th>Code</th>
+        <th>Title</th>
+        <th>Credits</th>
+        <th>Course</th>
+        <th>Actions</th>
+      </tr>
+      <?php
+      $q = mysqli_query(
+          $conn,
+          "SELECT u.*,c.course_code FROM course_unit u JOIN course c ON c.course_id=u.course_id ORDER BY u.course_unit_id DESC",
+      );
+      while ($r = mysqli_fetch_assoc($q)) {
+          echo "<tr><td>" .
+              $r["course_unit_id"] .
+              "</td><td>" .
+              htmlspecialchars($r["course_unit_code"]) .
+              "</td><td>" .
+              htmlspecialchars($r["course_unit_title"]) .
+              "</td><td>" .
+              $r["credit_units"] .
+              "</td><td>" .
+              htmlspecialchars($r["course_code"]) .
+              '</td><td><a class="btn" href="course_unit.php?edit=' .
+              $r["course_unit_id"] .
+              '">Edit</a> <form action="course_unit.php" method="POST" style="display:inline"><input type="hidden" name="delete_id" value="' .
+              $r["course_unit_id"] .
+              '"><button class="btn danger" name="delete" onclick="return confirm(\'Delete?\')">Delete</button></form></td></tr>';
+      }
+      ?>
+    </table>
+  </div>
+</div>
+<?php require "footer.php"; ?>
