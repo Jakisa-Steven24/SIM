@@ -1,8 +1,165 @@
 <?php
-require "db.php";$pageTitle="Registration";$id=0;$student="";$course="";$fee="";$date=date('Y-m-d');$paid="";
-if(isset($_POST['save'])){$id=(int)$_POST['registration_id'];$student=(int)$_POST['student_id'];$course=(int)$_POST['course_id'];$fee=(int)$_POST['fee_type_id'];$date=mysqli_real_escape_string($conn,$_POST['registration_date']);$paid=(int)$_POST['amount_paid'];$sql=$id?"UPDATE registration SET student_id=$student,course_id=$course,fee_type_id=$fee,registration_date='$date',amount_paid=$paid WHERE registration_id=$id":"INSERT INTO registration(student_id,course_id,fee_type_id,registration_date,amount_paid) VALUES($student,$course,$fee,'$date',$paid)";if(mysqli_query($conn,$sql)){header("Location: registration.php?message=Registration saved successfully");exit;}$error=mysqli_error($conn);}
-if(isset($_POST['delete'])){$id=(int)$_POST['delete_id'];if(mysqli_query($conn,"DELETE FROM registration WHERE registration_id=$id")){header("Location: registration.php?message=Registration deleted successfully");exit;}$error=mysqli_error($conn);}
-if(isset($_GET['edit'])){$id=(int)$_GET['edit'];$r=mysqli_fetch_assoc(mysqli_query($conn,"SELECT * FROM registration WHERE registration_id=$id"));if($r){$student=$r['student_id'];$course=$r['course_id'];$fee=$r['fee_type_id'];$date=$r['registration_date'];$paid=$r['amount_paid'];}}
-require "header.php";if(isset($error))echo '<div class="message error">'.htmlspecialchars($error).'</div>';?>
-<h1>Registration Form</h1><div class="card"><form action="registration.php" method="POST"><input type="hidden" name="registration_id" value="<?php echo $id;?>"><div class="form-grid"><div class="field"><label>Student</label><select name="student_id" required><option value="">Select Student</option><?php $q=mysqli_query($conn,"SELECT * FROM student ORDER BY reg_no");while($r=mysqli_fetch_assoc($q))echo '<option value="'.$r['student_id'].'" '.($student==$r['student_id']?'selected':'').'>'.htmlspecialchars($r['reg_no'].' - '.$r['first_name'].' '.$r['last_name']).'</option>';?></select></div><div class="field"><label>Course</label><select name="course_id" required><option value="">Select Course</option><?php $q=mysqli_query($conn,"SELECT * FROM course ORDER BY course_code");while($r=mysqli_fetch_assoc($q))echo '<option value="'.$r['course_id'].'" '.($course==$r['course_id']?'selected':'').'>'.htmlspecialchars($r['course_code'].' - '.$r['course_title']).'</option>';?></select></div><div class="field"><label>Fee Type</label><select name="fee_type_id" required><option value="">Select Fee Type</option><?php $q=mysqli_query($conn,"SELECT * FROM fee_type ORDER BY fee_name");while($r=mysqli_fetch_assoc($q))echo '<option value="'.$r['fee_type_id'].'" '.($fee==$r['fee_type_id']?'selected':'').'>'.htmlspecialchars($r['fee_name'].' - UGX '.number_format($r['amount'])).'</option>';?></select></div><div class="field"><label>Registration Date</label><input type="date" name="registration_date" value="<?php echo $date;?>" required></div><div class="field"><label>Amount Paid (UGX)</label><input type="number" name="amount_paid" value="<?php echo $paid;?>" required></div></div><div class="actions"><button class="btn" name="save"><?php echo $id?'Update Registration':'Save Registration';?></button><a class="btn secondary" href="registration.php">Clear</a></div></form></div>
-<div class="card"><h2>Registration Records</h2><div class="table-wrap"><table><tr><th>registration_id</th><th>Student</th><th>Course</th><th>Fee Type</th><th>Date</th><th>Amount Paid</th><th>Actions</th></tr><?php $q=mysqli_query($conn,"SELECT r.*,s.reg_no,CONCAT(s.first_name,' ',s.last_name) student_name,c.course_code,f.fee_name FROM registration r JOIN student s ON s.student_id=r.student_id JOIN course c ON c.course_id=r.course_id JOIN fee_type f ON f.fee_type_id=r.fee_type_id ORDER BY r.registration_id DESC");while($r=mysqli_fetch_assoc($q)){echo '<tr><td>'.$r['registration_id'].'</td><td>'.htmlspecialchars($r['reg_no'].' - '.$r['student_name']).'</td><td>'.htmlspecialchars($r['course_code']).'</td><td>'.htmlspecialchars($r['fee_name']).'</td><td>'.$r['registration_date'].'</td><td>UGX '.number_format($r['amount_paid']).'</td><td><a class="btn" href="registration.php?edit='.$r['registration_id'].'">Edit</a> <form action="registration.php" method="POST" style="display:inline"><input type="hidden" name="delete_id" value="'.$r['registration_id'].'"><button class="btn danger" name="delete">Delete</button></form></td></tr>';}?></table></div></div><?php require "footer.php";?>
+require "db.php";
+$pageTitle = "Registration";
+$id = 0;
+$student = "";
+$course = "";
+$fee = "";
+$date = date("Y-m-d");
+$paid = "";
+if (isset($_POST["save"])) {
+    $id = (int) $_POST["registration_id"];
+    $student = (int) $_POST["student_id"];
+    $course = (int) $_POST["course_id"];
+    $fee = (int) $_POST["fee_type_id"];
+    $date = mysqli_real_escape_string($conn, $_POST["registration_date"]);
+    $paid = (int) $_POST["amount_paid"];
+    $sql = $id
+        ? "UPDATE registration SET student_id=$student,course_id=$course,fee_type_id=$fee,registration_date='$date',amount_paid=$paid WHERE registration_id=$id"
+        : "INSERT INTO registration(student_id,course_id,fee_type_id,registration_date,amount_paid) VALUES($student,$course,$fee,'$date',$paid)";
+    if (mysqli_query($conn, $sql)) {
+        header("Location: registration.php?message=Registration saved successfully");
+        exit();
+    }
+    $error = mysqli_error($conn);
+}
+if (isset($_POST["delete"])) {
+    $id = (int) $_POST["delete_id"];
+    if (mysqli_query($conn, "DELETE FROM registration WHERE registration_id=$id")) {
+        header("Location: registration.php?message=Registration deleted successfully");
+        exit();
+    }
+    $error = mysqli_error($conn);
+}
+if (isset($_GET["edit"])) {
+    $id = (int) $_GET["edit"];
+    $r = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * FROM registration WHERE registration_id=$id"));
+    if ($r) {
+        $student = $r["student_id"];
+        $course = $r["course_id"];
+        $fee = $r["fee_type_id"];
+        $date = $r["registration_date"];
+        $paid = $r["amount_paid"];
+    }
+}
+require "header.php";
+if (isset($error)) {
+    echo '<div class="message error">' . htmlspecialchars($error) . "</div>";
+}
+?>
+<h1>Registration Form</h1>
+<div class="card">
+  <form action="registration.php" method="POST">
+    <input type="hidden" name="registration_id" value="<?php echo $id; ?>">
+    <div class="form-grid">
+      <div class="field">
+        <label>Student</label>
+        <select name="student_id" required>
+          <option value="">Select Student</option>
+          <?php
+          $q = mysqli_query($conn, "SELECT * FROM student ORDER BY reg_no");
+          while ($r = mysqli_fetch_assoc($q)) {
+              echo '<option value="' .
+                  $r["student_id"] .
+                  '" ' .
+                  ($student == $r["student_id"] ? "selected" : "") .
+                  ">" .
+                  htmlspecialchars($r["reg_no"] . " - " . $r["first_name"] . " " . $r["last_name"]) .
+                  "</option>";
+          }
+          ?>
+        </select>
+      </div>
+      <div class="field">
+        <label>Course</label>
+        <select name="course_id" required>
+          <option value="">Select Course</option>
+          <?php
+          $q = mysqli_query($conn, "SELECT * FROM course ORDER BY course_code");
+          while ($r = mysqli_fetch_assoc($q)) {
+              echo '<option value="' .
+                  $r["course_id"] .
+                  '" ' .
+                  ($course == $r["course_id"] ? "selected" : "") .
+                  ">" .
+                  htmlspecialchars($r["course_code"] . " - " . $r["course_title"]) .
+                  "</option>";
+          }
+          ?>
+        </select>
+      </div>
+      <div class="field">
+        <label>Fee Type</label>
+        <select name="fee_type_id" required>
+          <option value="">Select Fee Type</option>
+          <?php
+          $q = mysqli_query($conn, "SELECT * FROM fee_type ORDER BY fee_name");
+          while ($r = mysqli_fetch_assoc($q)) {
+              echo '<option value="' .
+                  $r["fee_type_id"] .
+                  '" ' .
+                  ($fee == $r["fee_type_id"] ? "selected" : "") .
+                  ">" .
+                  htmlspecialchars($r["fee_name"] . " - UGX " . number_format($r["amount"])) .
+                  "</option>";
+          }
+          ?>
+        </select>
+      </div>
+      <div class="field">
+        <label>Registration Date</label>
+        <input type="date" name="registration_date" value="<?php echo $date; ?>" required>
+      </div>
+      <div class="field">
+        <label>Amount Paid (UGX)</label>
+        <input type="number" name="amount_paid" value="<?php echo $paid; ?>" required>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn" name="save"><?php echo $id ? "Update Registration" : "Save Registration"; ?></button>
+      <a class="btn secondary" href="registration.php">Clear</a>
+    </div>
+  </form>
+</div>
+<div class="card">
+  <h2>Registration Records</h2>
+  <div class="table-wrap">
+    <table>
+      <tr>
+        <th>registration_id</th>
+        <th>Student</th>
+        <th>Course</th>
+        <th>Fee Type</th>
+        <th>Date</th>
+        <th>Amount Paid</th>
+        <th>Actions</th>
+      </tr>
+      <?php
+      $q = mysqli_query(
+          $conn,
+          "SELECT r.*,s.reg_no,CONCAT(s.first_name,' ',s.last_name) student_name,c.course_code,f.fee_name FROM registration r JOIN student s ON s.student_id=r.student_id JOIN course c ON c.course_id=r.course_id JOIN fee_type f ON f.fee_type_id=r.fee_type_id ORDER BY r.registration_id DESC",
+      );
+      while ($r = mysqli_fetch_assoc($q)) {
+          echo "<tr><td>" .
+              $r["registration_id"] .
+              "</td><td>" .
+              htmlspecialchars($r["reg_no"] . " - " . $r["student_name"]) .
+              "</td><td>" .
+              htmlspecialchars($r["course_code"]) .
+              "</td><td>" .
+              htmlspecialchars($r["fee_name"]) .
+              "</td><td>" .
+              $r["registration_date"] .
+              "</td><td>UGX " .
+              number_format($r["amount_paid"]) .
+              '</td><td><a class="btn" href="registration.php?edit=' .
+              $r["registration_id"] .
+              '">Edit</a> <form action="registration.php" method="POST" style="display:inline"><input type="hidden" name="delete_id" value="' .
+              $r["registration_id"] .
+              '"><button class="btn danger" name="delete">Delete</button></form></td></tr>';
+      }
+      ?>
+    </table>
+  </div>
+</div>
+<?php require "footer.php"; ?>
